@@ -27,7 +27,7 @@ pub fn shard(query: &str, schema: &ShardingSchema) -> Result<Shard, Error> {
             if let Some(cap) = SHARDING_KEY.captures(comment) {
                 if let Some(sharding_key) = cap.get(1) {
                     // TODO: support vectors in comments.
-                    return Ok(shard_str(sharding_key.as_str(), schema, &vec![], 0));
+                    return Ok(shard_str(sharding_key.as_str(), schema, &vec![], 0,None, None));
                 }
             }
             if let Some(cap) = SHARD.captures(comment) {

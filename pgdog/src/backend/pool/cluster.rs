@@ -271,7 +271,7 @@ mod test {
         backend::{Shard, ShardedTables},
         config::{DataType, ShardedTable},
     };
-
+    use crate::config::ShardingMethod::Hash;
     use super::Cluster;
 
     impl Cluster {
@@ -286,6 +286,9 @@ mod test {
                     data_type: DataType::Bigint,
                     centroids_path: None,
                     centroid_probes: 1,
+                    shard_method: Hash,
+                    ranges: None
+                    
                 }]),
                 shards: vec![Shard::default(), Shard::default()],
                 ..Default::default()

@@ -210,6 +210,8 @@ impl CopyParser {
                                 &self.sharding_schema,
                                 &sharding_column.centroids,
                                 CENTROID_PROBES,
+                                None, 
+                                None,
                             )
                         } else {
                             Shard::All
@@ -242,6 +244,8 @@ impl CopyParser {
                                     self.sharding_schema.shards,
                                     &column.centroids,
                                     CENTROID_PROBES,
+                                    None, 
+                                    None,
                                 )
                             } else {
                                 Shard::All

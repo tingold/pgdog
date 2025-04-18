@@ -1,3 +1,4 @@
+use std::option::Option;
 use uuid::Uuid;
 
 use crate::{
@@ -8,9 +9,11 @@ use crate::{
 
 pub mod ffi;
 pub mod vector;
+mod range;
 
 pub use vector::{Centroids, Distance};
-
+use crate::config::DataType::Bigint;
+use crate::config::ShardingMethod;
 use super::parser::Shard;
 
 /// Hash `BIGINT`.
@@ -30,6 +33,7 @@ pub fn uuid(uuid: Uuid) -> u64 {
 
 /// Shard an integer.
 pub fn shard_int(value: i64, schema: &ShardingSchema) -> Shard {
+
     Shard::direct(bigint(value) as usize % schema.shards)
 }
 
@@ -42,6 +46,9 @@ pub fn shard_str(
     schema: &ShardingSchema,
     centroids: &Vec<Vector>,
     centroid_probes: usize,
+    method:  Option<ShardingMethod>,
+    ranges: Option<crate::config::ranges::ShardRanges>,
+
 ) -> Shard {
     let data_type = if value.starts_with('[') && value.ends_with(']') {
         DataType::Vector
@@ -50,7 +57,7 @@ pub fn shard_str(
     } else {
         DataType::Uuid
     };
-    shard_value(value, &data_type, schema.shards, centroids, centroid_probes)
+    shard_value(value, &data_type, schema.shards, centroids, centroid_probes,method,ranges)
 }
 
 /// Shard a value that's coming out of the query text directly.
@@ -60,7 +67,20 @@ pub fn shard_value(
     shards: usize,
     centroids: &Vec<Vector>,
     centroid_probes: usize,
+    method:  Option<ShardingMethod>,
+    ranges: Option<crate::config::ranges::ShardRanges>,
 ) -> Shard {
+    if method.is_some() && method.unwrap() == ShardingMethod::Range && ranges.is_some() && data_type == &Bigint{
+        
+        let shard = value.parse::<i64>()
+            .ok()
+            .map(|v| ranges.unwrap().find_shard_for_value(v))
+            .unwrap_or(None)
+            .map(Shard::Direct)
+            .unwrap_or(Shard::All);
+        return shard
+    }
+
     match data_type {
         DataType::Bigint => value
             .parse()
@@ -87,7 +107,18 @@ pub fn shard_binary(
     shards: usize,
     centroids: &Vec<Vector>,
     centroid_probes: usize,
+    method:  Option<ShardingMethod>,
+    ranges: Option<crate::config::ranges::ShardRanges>,
 ) -> Shard {
+    if method.is_some() && method.unwrap() == ShardingMethod::Range && ranges.is_some() && data_type == &Bigint{
+        let shard = i64::decode(bytes, Format::Binary)
+            .ok()
+            .map(|v| ranges.unwrap().find_shard_for_value(v))
+            .unwrap_or(None)
+            .map(Shard::Direct)
+            .unwrap_or(Shard::All);
+        return shard
+    }
     match data_type {
         DataType::Bigint => i64::decode(bytes, Format::Binary)
             .ok()
@@ -113,6 +144,8 @@ pub fn shard_param(value: &ParameterWithFormat, table: &ShardedTable, shards: us
             shards,
             &table.centroids,
             table.centroid_probes,
+            Some(table.shard_method),
+            table.ranges.clone()
         ),
         Format::Text => value
             .text()
@@ -123,6 +156,8 @@ pub fn shard_param(value: &ParameterWithFormat, table: &ShardedTable, shards: us
                     shards,
                     &table.centroids,
                     table.centroid_probes,
+                    Some(table.shard_method),
+                    table.ranges.clone()
                 )
             })
             .unwrap_or(Shard::All),

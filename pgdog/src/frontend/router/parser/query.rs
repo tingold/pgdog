@@ -325,6 +325,8 @@ impl QueryParser {
                                 sharding_schema.shards,
                                 &table.centroids,
                                 table.centroid_probes,
+                                Some(table.shard_method),
+                                table.ranges.clone()
                             ));
                         }
 

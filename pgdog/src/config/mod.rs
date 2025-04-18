@@ -4,23 +4,23 @@ pub mod convert;
 pub mod error;
 pub mod overrides;
 pub mod url;
+pub mod ranges;
 
 use error::Error;
 pub use overrides::Overrides;
 
-use std::collections::HashSet;
+use std::collections::{HashSet};
 use std::fs::read_to_string;
 use std::net::Ipv4Addr;
 use std::sync::Arc;
 use std::time::Duration;
 use std::{collections::HashMap, path::PathBuf};
-
 use arc_swap::ArcSwap;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use tracing::info;
 use tracing::warn;
-
+use crate::config::ranges::ShardRanges;
 use crate::net::messages::Vector;
 use crate::util::random_string;
 
@@ -414,6 +414,16 @@ pub struct Stats {}
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq, Copy, Eq, Ord, PartialOrd)]
 #[serde(rename_all = "snake_case")]
+pub enum ShardingMethod {
+    #[default]
+    Hash,
+    Range,
+    List,    
+    
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq, Copy, Eq, Ord, PartialOrd)]
+#[serde(rename_all = "snake_case")]
 pub enum PoolerMode {
     #[default]
     Transaction,
@@ -627,6 +637,13 @@ pub struct ShardedTable {
     /// How many centroids to probe.
     #[serde(default)]
     pub centroid_probes: usize,
+    // The sharding method to use, hash is default
+    #[serde(default)]
+    pub shard_method: ShardingMethod,
+    // If shard_methods is range, these are the shard to range mappings 
+    pub ranges: Option<ShardRanges>,
+       
+
 }
 
 impl ShardedTable {
@@ -658,6 +675,7 @@ impl ShardedTable {
         Ok(())
     }
 }
+
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Default, Copy)]
 #[serde(rename_all = "snake_case")]

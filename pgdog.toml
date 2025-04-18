@@ -78,6 +78,18 @@ name = "users"
 data_type = "bigint"
 column = "id"
 primary = true
+shard_method = "range"
+[[sharded_tables]]
+database = "my_database"
+name = "users"
+column = "user_id"
+shard_method = "range"
+# Configure the ranges field
+[sharded_tables.ranges]
+range_map = { "0" = [{ min = 1, max = 1000 }], "1" = [{ min = 1001, max = 2000 }] }
+
+
+
 
 [[sharded_tables]]
 database = "pgdog_sharded"
