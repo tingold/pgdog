@@ -1,5 +1,5 @@
-use crate::config::{ShardListMap, ShardRangeMap};
 use super::Centroids;
+use crate::config::{ShardListMap, ShardRangeMap};
 
 #[derive(Debug)]
 pub enum Operator<'a> {
@@ -11,5 +11,4 @@ pub enum Operator<'a> {
     },
     Lists(ShardListMap),
     Ranges(ShardRangeMap),
-
 }

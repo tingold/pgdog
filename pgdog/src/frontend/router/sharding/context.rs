@@ -1,5 +1,5 @@
-use crate::frontend::router::parser::Shard;
 use super::{Error, Operator, Value};
+use crate::frontend::router::parser::Shard;
 
 #[derive(Debug)]
 pub struct Context<'a> {
@@ -24,14 +24,14 @@ impl<'a> Context<'a> {
                     return Ok(centroids.shard(&vector, *shards, *probes));
                 }
             }
-            Operator::Ranges(srm)=> {
+            Operator::Ranges(srm) => {
                 if let Some(i) = self.value.int()? {
-                    return Ok(srm.find_shard_key(i).unwrap())
+                    return Ok(srm.find_shard_key(i).unwrap());
                 }
             }
-            Operator::Lists(slm)=> {
+            Operator::Lists(slm) => {
                 if let Some(i) = self.value.int()? {
-                    return Ok(slm.find_shard_key(i).unwrap())
+                    return Ok(slm.find_shard_key(i).unwrap());
                 }
             }
         }

@@ -17,7 +17,6 @@ pub mod tables;
 pub mod value;
 pub mod vector;
 
-
 pub use context::*;
 pub use context_builder::*;
 pub use error::Error;
@@ -27,7 +26,6 @@ pub use value::*;
 pub use vector::{Centroids, Distance};
 
 use super::parser::Shard;
-
 
 /// Hash `BIGINT`.
 pub fn bigint(id: i64) -> u64 {
@@ -81,26 +79,25 @@ pub(crate) fn shard_value(
     centroids: &Vec<Vector>,
     centroid_probes: usize,
 ) -> Shard {
-      match data_type {
-            DataType::Bigint => value
-                .parse()
-                .map(|v| bigint(v) as usize % shards)
-                .ok()
-                .map(Shard::Direct)
-                .unwrap_or(Shard::All),
-            DataType::Uuid => value
-                .parse()
-                .map(|v| uuid(v) as usize % shards)
-                .ok()
-                .map(Shard::Direct)
-                .unwrap_or(Shard::All),
-            DataType::Vector => Vector::try_from(value)
-                .ok()
-                .map(|v| Centroids::from(centroids).shard(&v, shards, centroid_probes))
-                .unwrap_or(Shard::All),
-        } 
+    match data_type {
+        DataType::Bigint => value
+            .parse()
+            .map(|v| bigint(v) as usize % shards)
+            .ok()
+            .map(Shard::Direct)
+            .unwrap_or(Shard::All),
+        DataType::Uuid => value
+            .parse()
+            .map(|v| uuid(v) as usize % shards)
+            .ok()
+            .map(Shard::Direct)
+            .unwrap_or(Shard::All),
+        DataType::Vector => Vector::try_from(value)
+            .ok()
+            .map(|v| Centroids::from(centroids).shard(&v, shards, centroid_probes))
+            .unwrap_or(Shard::All),
+    }
 }
-
 
 pub(crate) fn shard_binary(
     bytes: &[u8],

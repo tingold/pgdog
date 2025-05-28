@@ -2,8 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::frontend::router::parser::{Shard};
-
+use crate::frontend::router::parser::Shard;
 
 // =============================================================================
 // Serialization Helper Module
@@ -18,10 +17,7 @@ mod usize_map_keys_as_strings {
         S: Serializer,
         V: Serialize,
     {
-        let string_map: HashMap<String, &V> = map
-            .iter()
-            .map(|(k, v)| (k.to_string(), v))
-            .collect();
+        let string_map: HashMap<String, &V> = map.iter().map(|(k, v)| (k.to_string(), v)).collect();
         string_map.serialize(serializer)
     }
 

@@ -70,7 +70,7 @@ impl<'a> Value<'a> {
             Ok(None)
         }
     }
-    
+
     pub fn int(&self) -> Result<Option<i64>, Error> {
         match self.data_type {
             DataType::Bigint => match self.data {
@@ -114,7 +114,7 @@ impl<'a> Value<'a> {
                     8 => i64::from_be_bytes(data.try_into()?) as i64,
                     _ => return Err(Error::IntegerSize),
                 }))),
-                Data::Integer(int) => Ok(Some(bigint(int))), 
+                Data::Integer(int) => Ok(Some(bigint(int))),
             },
 
             DataType::Uuid => match self.data {
@@ -122,9 +122,8 @@ impl<'a> Value<'a> {
                 Data::Binary(data) => Ok(Some(uuid(Uuid::from_bytes(data.try_into()?)))),
                 Data::Integer(_) => Ok(None),
             },
-            
+
             DataType::Vector => Ok(None),
-                        
         }
     }
 }

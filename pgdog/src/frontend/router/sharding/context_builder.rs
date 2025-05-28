@@ -1,4 +1,4 @@
-use crate::config::{DataType, ShardedTable, ShardingMethod, ShardListMap, ShardRangeMap};
+use crate::config::{DataType, ShardListMap, ShardRangeMap, ShardedTable, ShardingMethod};
 
 use super::{Centroids, Context, Data, Error, Operator, Value};
 
@@ -10,8 +10,7 @@ pub struct ContextBuilder<'a> {
     probes: usize,
     sharding_method: Option<ShardingMethod>,
     shard_range_map: Option<ShardRangeMap>,
-    shard_list_map: Option<ShardListMap>
-    
+    shard_list_map: Option<ShardListMap>,
 }
 
 impl<'a> ContextBuilder<'a> {
@@ -26,8 +25,8 @@ impl<'a> ContextBuilder<'a> {
             probes: table.centroid_probes,
             operator: None,
             value: None,
-            // added for list and range sharding 
-            // todo: add lifetimes to these to avoid cloning  
+            // added for list and range sharding
+            // todo: add lifetimes to these to avoid cloning
             sharding_method: table.sharding_method.clone(),
             shard_range_map: table.shard_range_map.clone(),
             shard_list_map: table.shard_list_map.clone(),
@@ -77,11 +76,12 @@ impl<'a> ContextBuilder<'a> {
             match method {
                 ShardingMethod::Hash => {
                     self.operator = Some(Operator::Shards(shards));
-                    return self
+                    return self;
                 }
                 ShardingMethod::Range => {
                     if self.shard_range_map.is_some() {
-                        self.operator = Some(Operator::Ranges(self.shard_range_map.clone().unwrap()))
+                        self.operator =
+                            Some(Operator::Ranges(self.shard_range_map.clone().unwrap()))
                     }
                 }
                 ShardingMethod::List => {

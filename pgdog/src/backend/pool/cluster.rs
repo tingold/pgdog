@@ -362,7 +362,7 @@ mod test {
                         centroid_probes: 1,
                         sharding_method: None,
                         shard_range_map: None,
-                        shard_list_map: None
+                        shard_list_map: None,
                     }],
                     vec!["sharded_omni".into()],
                     false,
