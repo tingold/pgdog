@@ -198,33 +198,3 @@ impl<'de> Deserialize<'de> for ShardListMap {
         )?))
     }
 }
-
-// =============================================================================
-// Shardable Trait and Implementations
-// =============================================================================
-
-/// Trait for types that can provide sharding functionality
-pub trait Shardable {
-    /// Get the shard ID for a given value
-    fn shard(&self, value: i64) -> Shard;
-}
-
-impl Shardable for ShardRangeMap {
-    fn shard(&self, value: i64) -> Shard {
-        if self.0.is_empty() {
-            return Shard::All;
-        }
-
-        self.find_shard_key(value).unwrap_or_else(|| Shard::All)
-    }
-}
-
-impl Shardable for ShardListMap {
-    fn shard(&self, value: i64) -> Shard {
-        if self.0.is_empty() {
-            return Shard::All;
-        }
-
-        self.find_shard_key(value).unwrap_or_else(|| Shard::All)
-    }
-}
