@@ -1,5 +1,4 @@
 use std::str::{from_utf8, FromStr};
-
 use uuid::Uuid;
 
 use super::{bigint, uuid, Error};
@@ -71,6 +70,22 @@ impl<'a> Value<'a> {
             Ok(None)
         }
     }
+    
+    pub fn int(&self) -> Result<Option<i64>, Error> {
+        match self.data_type {
+            DataType::Bigint => match self.data {
+                Data::Text(text) => Ok(Some(text.parse::<i64>()?)),
+                Data::Binary(data) => Ok(Some(match data.len() {
+                    2 => i16::from_be_bytes(data.try_into()?) as i64,
+                    4 => i32::from_be_bytes(data.try_into()?) as i64,
+                    8 => i64::from_be_bytes(data.try_into()?) as i64,
+                    _ => return Err(Error::IntegerSize),
+                })),
+                Data::Integer(int) => Ok(Some(int)),
+            },
+            _ => Ok(None),
+        }
+    }
 
     pub fn valid(&self) -> bool {
         match self.data_type {
@@ -99,7 +114,7 @@ impl<'a> Value<'a> {
                     8 => i64::from_be_bytes(data.try_into()?) as i64,
                     _ => return Err(Error::IntegerSize),
                 }))),
-                Data::Integer(int) => Ok(Some(bigint(int))),
+                Data::Integer(int) => Ok(Some(bigint(int))), 
             },
 
             DataType::Uuid => match self.data {
@@ -107,8 +122,9 @@ impl<'a> Value<'a> {
                 Data::Binary(data) => Ok(Some(uuid(Uuid::from_bytes(data.try_into()?)))),
                 Data::Integer(_) => Ok(None),
             },
-
+            
             DataType::Vector => Ok(None),
+                        
         }
     }
 }

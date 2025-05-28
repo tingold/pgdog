@@ -25,3 +25,4 @@ pub enum Error {
     #[error("wrong integer binary size")]
     IntegerSize,
 }
+

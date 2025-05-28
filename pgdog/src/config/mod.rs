@@ -4,6 +4,7 @@ pub mod convert;
 pub mod error;
 pub mod overrides;
 pub mod url;
+mod shards;
 
 use error::Error;
 pub use overrides::Overrides;
@@ -21,6 +22,7 @@ use serde::{Deserialize, Serialize};
 use tracing::info;
 use tracing::warn;
 
+pub(crate) use crate::config::shards::{ShardingMethod, ShardListMap, ShardRangeMap};
 use crate::net::messages::Vector;
 use crate::util::{human_duration_optional, random_string};
 
@@ -826,6 +828,12 @@ pub struct ShardedTable {
     /// How many centroids to probe.
     #[serde(default)]
     pub centroid_probes: usize,
+    #[serde(default)]
+    pub sharding_method: Option<ShardingMethod>,
+
+    pub shard_range_map: Option<ShardRangeMap>,
+
+    pub shard_list_map: Option<ShardListMap>
 }
 
 impl ShardedTable {
@@ -865,6 +873,10 @@ pub enum DataType {
     Bigint,
     Uuid,
     Vector,
+    // TODO: implement more types?
+    // String,
+    // DateTimeUTC
+    // Float
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Default)]
@@ -955,8 +967,8 @@ pub struct MultiTenant {
 
 #[cfg(test)]
 pub mod test {
+    
     use crate::backend::databases::init;
-
     use super::*;
 
     pub fn load_test() {
@@ -1052,4 +1064,5 @@ column = "tenant_id"
         assert_eq!(config.tcp.retries().unwrap(), 5);
         assert_eq!(config.multi_tenant.unwrap().column, "tenant_id");
     }
+
 }
